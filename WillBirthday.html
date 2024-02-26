@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+        .card {
+            position: relative;
+            z-index: 2;
+            width: 300px;
+            height: 200px;
+            background-color: #ff4081;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+            text-align: center;
+            perspective: 1000px; /* Needed for 3D flip effect */
+        }
+        .card-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-content div {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+        .card-front {
+            background-image: url('bday.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .card-back {
+            background-image: url('MicrosoftTeams-image.png');
+            background-size: cover;
+            background-position: center;
+            transform: rotateY(180deg);
+        }
+        .play-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: yellow;
+            border: none;
+            color: black;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            z-index: 2;
+        }
+        #confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .circle {
+            position: absolute;
+            width: 200px; /* Increased size */
+            height: 200px; /* Increased size */
+            background-size: cover;
+            animation: float 2s ease-in-out infinite; /* Shorter duration for more noticeable floating */
+            border-radius: 50%; /* Makes the image circular */
+        }
+        .circle1 {
+            background-image: url('Will.jpg');
+            top: 10%;
+            left: 10%;
+        }
+        .circle2 {
+            background-image: url('nananana.jpg');
+            top: 10%;
+            right: 10%;
+        }
+        .circle3 {
+            background-image: url('hahha.jpg');
+            bottom: 10%;
+            left: 10%;
+        }
+        .circle4 {
+            background-image: url('mimi and will.jpg');
+            bottom: 10%;
+            right: 10%;
+        }
+        @keyframes float {
+            0% { transform: translatey(0px); }
+            50% { transform: translatey(-30px); } /* Increased translation for more noticeable floating */
+            100% { transform: translatey(0px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-content">
+            <div class="card-front">
+                <h1>Happy Birthday!</h1>
+                <p>Hope you have an amazing day baby</p>
+            </div>
+            <div class="card-back">
+                <h1>I love you </h1>
+                <p>Will & Mimi forevaaa</p>
+            </div>
+        </div>
+    </div>
+    <audio id="birthdaySong" src="happy-birthday-to-you-piano-version-13976.mp3" preload="auto"></audio>
+    <button class="play-button" onclick="playAudio()">Play me !!</button>
+    <canvas id="confetti"></canvas>
+    <div class="circle circle1"></div>
+    <div class="circle circle2"></div>
+    <div class="circle circle3"></div>
+    <div class="circle circle4"></div>
+    <script>
+        function playAudio() {
+            var audio = document.getElementById('birthdaySong');
+            audio.play();
+        }
+
+        var canvas = document.getElementById('confetti');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var ctx = canvas.getContext('2d');
+        var pieces = [];
+        var numberOfPieces = 50;
+        var lastUpdateTime = Date.now();
+
+        function randomColor () {
+            var colors = ['#f00', '#0f0', '#00f', '#0ff', '#f0f', '#ff0'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function update () {
+            var now = Date.now();
+            var dt = now - lastUpdateTime;
+
+            for (var i = pieces.length - 1; i >= 0; i--) {
+                var p = pieces[i];
+
+                if (p.y > canvas.height) {
+                    pieces.splice(i, 1);
+                    continue;
+                }
+
+                p.y += p.gravity * dt;
+                p.rotation += p.rotationSpeed * dt;
+            }
+
+            while (pieces.length < numberOfPieces) {
+                pieces.push(new Piece(Math.random() * canvas.width, -20));
+            }
+
+            lastUpdateTime = now;
+
+            setTimeout(update, 1);
+        }
+
+        function draw () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            pieces.forEach(function (p) {
+                ctx.save();
+
+                ctx.fillStyle = p.color;
+
+                ctx.translate(p.x + p.size / 2, p.y + p.size / 2);
+                ctx.rotate(p.rotation);
+
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+
+                ctx.restore();
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        function Piece (x, y) {
+            this.x = x;
+            this.y = y;
+            this.size = (Math.random() * 0.5 + 0.75) * 15;
+            this.gravity = (Math.random() * 0.5 + 0.75) * 0.1;
+            this.rotation = (Math.PI * 2) * Math.random();
+            this.rotationSpeed = (Math.PI * 2) * (Math.random() - 0.5) * 0.001;
+            this.color = randomColor();
+        }
+
+        while (pieces.length < numberOfPieces) {
+            pieces.push(new Piece(Math.random() * canvas.width, Math.random() * canvas.height));
+        }
+
+        update();
+        draw();
+
+        var cardContent = document.querySelector('.card-content');
+        var isFlipped = false;
+        document.querySelector('.card').addEventListener('click', function() {
+            if (!isFlipped) {
+                cardContent.style.transform = 'rotateY(180deg)';
+                isFlipped = true;
+            } else {
+                cardContent.style.transform = 'rotateY(0deg)';
+                isFlipped = false;
+            }
+        });
+    </script>
+</body>
+</html>
